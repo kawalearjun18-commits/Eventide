@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Eventide Event Planner</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f3ee;--sf:#fff;--tx:#1d2b27;--mu:#5d6b66;--pr:#14433a;--pt:#fff;--ac:#c4452d;--ln:#ddd6ca;--ok:#1d7a4d;--wa:#a8660a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#111a17;--sf:#1a2622;--tx:#eae6dd;--mu:#9baba5;--pr:#5fbf9f;--pt:#0d1512;--ac:#ef7a62;--ln:#2c3b36;--ok:#5fd09a;--wa:#e7b04f}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#111a17;--sf:#1a2622;--tx:#eae6dd;--mu:#9baba5;--pr:#5fbf9f;--pt:#0d1512;--ac:#ef7a62;--ln:#2c3b36;--ok:#5fd09a;--wa:#e7b04f}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 Figtree,system-ui,sans-serif}
+h1,h2,h3{font-family:'DM Serif Display',Georgia,serif;font-weight:400;line-height:1.15;margin:0 0 .5em}
+h1{font-size:clamp(2.2rem,7vw,3.8rem)}h2{font-size:1.8rem}h3{font-size:1.25rem}
+nav{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;padding:14px 20px;border-bottom:1px solid var(--ln)}
+nav b{font-family:'DM Serif Display',Georgia,serif;font-size:1.4rem;font-weight:400;margin-right:auto;cursor:pointer;color:var(--pr)}
+nav a{cursor:pointer;color:var(--tx);padding:4px 2px;border-bottom:2px solid transparent}nav a.on{border-color:var(--ac)}
+main{max-width:1000px;margin:0 auto;padding:24px 20px 60px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.card{background:var(--sf);border:1px solid var(--ln);border-radius:10px;padding:18px}
+.mu{color:var(--mu)}.price{font-family:'DM Serif Display',Georgia,serif;font-size:1.6rem;color:var(--pr)}
+button,.btn{font:inherit;font-weight:600;background:var(--pr);color:var(--pt);border:0;border-radius:6px;padding:10px 18px;cursor:pointer}
+button.alt{background:transparent;color:var(--pr);border:1.5px solid var(--pr)}button.sm{padding:5px 10px;font-size:.85rem}button.dng{background:var(--ac);color:#fff}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+label{display:block;font-weight:600;margin:12px 0 4px;font-size:.92rem}
+input,select,textarea{width:100%;font:inherit;padding:10px;border:1px solid var(--ln);border-radius:6px;background:var(--sf);color:var(--tx)}
+input[type=checkbox],input[type=radio]{width:auto}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}@media(max-width:560px){.row{grid-template-columns:1fr}}
+.eq{display:flex;gap:8px;align-items:center;font-weight:400;margin:6px 0}
+.tbl{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:.92rem}th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--ln);vertical-align:top}
+.tag{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:600;border:1px solid currentColor}
+.ok{color:var(--ok)}.wa{color:var(--wa)}.er{color:var(--ac)}
+.hero{padding:30px 0 26px}.hero p{max-width:560px;font-size:1.1rem}
+.tile{height:130px;border-radius:8px;display:flex;align-items:flex-end;padding:10px;color:#fff;font-weight:600;font-size:2.3rem}
+.tile span{font-size:.9rem;margin-left:8px;margin-bottom:6px}
+.total{position:sticky;bottom:0;background:var(--sf);border:1px solid var(--ln);border-radius:10px;padding:14px;margin-top:18px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.msg{padding:10px 14px;border-radius:6px;background:var(--sf);border:1px solid var(--ac);margin-bottom:14px}
+.bill{max-width:560px}.bill td:last-child,.bill th:last-child{text-align:right}
+@media print{nav,.noprint{display:none}}
+</style></head><body>
+<nav id="nav"></nav><main id="app"></main>
+<script>
+const EVENTS=[
+{id:'Marriage',ic:'💍',base:25000,c:'#8c2f39',d:'Ceremony, reception and every detail between.'},
+{id:'Dance Show',ic:'💃',base:12000,c:'#3d3b8e',d:'Stage, lighting and sound for recitals and performances.'},
+{id:'Baby Shower',ic:'🍼',base:6000,c:'#2f7f86',d:'A soft, joyful afternoon for the parents-to-be.'},
+{id:'Birthday Party',ic:'🎂',base:5000,c:'#b5651d',d:'Themes, cake tables and games for all ages.'},
+{id:'Anniversary',ic:'🥂',base:8000,c:'#6b3e75',d:'An intimate dinner or a big family celebration.'},
+{id:'Corporate Event',ic:'🎤',base:15000,c:'#2d5a3d',d:'Launches, offsites and award nights.'}];
+const PACKS=[
+{id:'Silver',price:10000,f:['Basic decoration','Up to 50 guests','Event coordinator (4 hrs)','Photo coverage (2 hrs)']},
+{id:'Gold',price:25000,f:['Premium decoration','Up to 150 guests','Event coordinator (8 hrs)','Photo and video coverage','Welcome drinks']},
+{id:'Platinum',price:60000,f:['Designer decoration','Up to 400 guests','Dedicated planning team','Full photo, video and drone','Full catering menu','Live entertainment']}];
+const VENUES=[{id:'Garden Lawn',p:15000},{id:'Grand Banquet Hall',p:30000},{id:'Beach Resort',p:45000},{id:'Rooftop Terrace',p:20000},{id:'Your own location',p:0}];
+const EQUIP=[{id:'Sound system',p:3000},{id:'Stage and lighting',p:6000},{id:'Projector and screen',p:2500},{id:'Floral arch',p:4500},{id:'Seating (per 50 chairs)',p:2000},{id:'Generator backup',p:3500},{id:'Photo booth',p:5000}];
+const money=n=>'₹'+Number(n).toLocaleString('en-IN');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let mem=null;
+function load(){if(mem)return mem;let d=null;try{d=JSON.parse(localStorage.getItem('eventide')||'null')}catch(e){}
+ mem=d||{users:[{name:'Site Admin',email:'admin@eventide.com',phone:'',pass:'admin123',admin:true}],bookings:[],session:null,seq:1000};return mem}
+function save(){try{localStorage.setItem('eventide',JSON.stringify(mem))}catch(e){}}
+const me=()=>{const d=load();return d.users.find(u=>u.email===d.session)};
+let view='home',arg=null,flash='';
+function go(v,a){view=v;arg=a||null;render();window.scrollTo(0,0)}
+function calc(b){const e=EVENTS.find(x=>x.id===b.event),p=PACKS.find(x=>x.id===b.pack),v=VENUES.find(x=>x.id===b.venue);
+ const items=[[b.event+' (base fee)',e.base],[p.id+' package',p.price],['Venue: '+v.id,v.p]];
+ b.equip.forEach(q=>{const x=EQUIP.find(y=>y.id===q);if(x)items.push([x.id,x.p])});
+ const sub=items.reduce((s,i)=>s+i[1],0),tax=Math.round(sub*.18);return{items,sub,tax,total:sub+tax}}
+function renderNav(){const u=me();const L=[['home','Home'],['events','Events'],['packages','Packages'],['gallery','Gallery'],['book','Book now']];
+ if(u&&!u.admin)L.push(['mine','My bookings']);if(u&&u.admin)L.push(['admin','Admin']);
+ document.getElementById('nav').innerHTML='<b onclick="go(\'home\')">Eventide</b>'+L.map(l=>`<a tabindex=0 class="${view===l[0]?'on':''}" onclick="go('${l[0]}')" onkeydown="if(event.key==='Enter')go('${l[0]}')">${l[1]}</a>`).join('')+
+ (u?`<span class="mu">${esc(u.name)}</span><a tabindex=0 onclick="logout()">Log out</a>`:`<a tabindex=0 onclick="go('login')">Log in</a><a tabindex=0 onclick="go('register')">Register</a>`)}
+function logout(){load().session=null;save();go('home')}
+function render(){renderNav();const m=document.getElementById('app');m.innerHTML=(flash?`<div class="msg" role="status">${esc(flash)}</div>`:'')+(V[view]||V.home)();flash='';if(view==='book')upd()}
+const V={
+home:()=>`<section class="hero"><h1>Your event, planned properly.</h1><p class="mu">Pick an event, choose a package, set the date and venue, and book online. You get a receipt number straight away and our team calls you to confirm.</p><button onclick="go('book')">Book an event</button> <button class="alt" onclick="go('packages')">See packages</button></section>
+ <h2>What we plan</h2><div class="grid">${EVENTS.map(e=>`<div class="card"><div style="font-size:2rem">${e.ic}</div><h3>${e.id}</h3><p class="mu">${e.d}</p><div>from <span class="price">${money(e.base)}</span></div></div>`).join('')}</div>`,
+events:()=>`<h2>Events</h2><div class="grid">${EVENTS.map(e=>`<div class="card"><div class="tile" style="background:${e.c}">${e.ic}</div><h3 style="margin-top:12px">${e.id}</h3><p class="mu">${e.d}</p><p>Base fee <b>${money(e.base)}</b></p><button class="sm" onclick="go('book',{event:'${e.id}'})">Book this</button></div>`).join('')}</div>`,
+packages:()=>`<h2>Packages</h2><div class="grid">${PACKS.map(p=>`<div class="card"><h3>${p.id}</h3><div class="price">${money(p.price)}</div><ul class="mu" style="padding-left:18px">${p.f.map(f=>`<li>${f}</li>`).join('')}</ul><button onclick="go('book',{pack:'${p.id}'})">Choose ${p.id}</button></div>`).join('')}</div>`,
+gallery:()=>`<h2>Gallery</h2><p class="mu">A look at the kinds of events we have delivered.</p><div class="grid">${[['💍','Garden wedding','#8c2f39'],['💃','Annual dance show','#3d3b8e'],['🍼','Pastel baby shower','#2f7f86'],['🎂','Sweet sixteen','#b5651d'],['🥂','Silver jubilee dinner','#6b3e75'],['🎤','Product launch','#2d5a3d'],['🌸','Floral arch setup','#a3456a'],['🎆','Rooftop reception','#22456b']].map(g=>`<div class="card" style="padding:0;overflow:hidden"><div class="tile" style="background:${g[2]};border-radius:0;height:150px">${g[0]}<span>${g[1]}</span></div></div>`).join('')}</div>`,
+login:()=>`<h2>Log in</h2><div class="card" style="max-width:420px"><label for=le>Email</label><input id=le type=email autocomplete=email><label for=lp>Password</label><input id=lp type=password autocomplete=current-password><p><button onclick="doLogin()">Log in</button></p><p class="mu">New here? <a href="#" onclick="go('register');return false">Create an account</a>. Admin demo: admin@eventide.com / admin123</p></div>`,
+register:()=>`<h2>Create an account</h2><div class="card" style="max-width:420px"><label for=rn>Full name</label><input id=rn><label for=re>Email</label><input id=re type=email><label for=rph>Phone</label><input id=rph type=tel><label for=rp>Password (6+ characters)</label><input id=rp type=password autocomplete=new-password><p><button onclick="doReg()">Register</button></p></div>`,
+book:()=>{const u=me();if(!u){flash='Log in or register to book an event.';return V.login()}if(u.admin)return'<p>Admins cannot book events. Use a customer account.</p>';
+ const a=arg||{};const today=new Date().toISOString().slice(0,10);
+ return `<h2>Book an event</h2><div class="card"><div class="row"><div><label for=be>Event type</label><select id=be onchange="upd()">${EVENTS.map(e=>`<option ${a.event===e.id?'selected':''}>${e.id}</option>`).join('')}</select></div>
+ <div><label for=bp>Package</label><select id=bp onchange="upd()">${PACKS.map(p=>`<option value="${p.id}" ${a.pack===p.id?'selected':''}>${p.id} (${money(p.price)})</option>`).join('')}</select></div>
+ <div><label for=bd>Date</label><input id=bd type=date min="${today}"></div><div><label for=bt>Time</label><input id=bt type=time value="18:00"></div>
+ <div><label for=bv>Place</label><select id=bv onchange="upd()">${VENUES.map(v=>`<option value="${v.id}">${v.id} (${v.p?money(v.p):'free'})</option>`).join('')}</select></div>
+ <div><label for=bg>Guests</label><input id=bg type=number min=1 value=50></div></div>
+ <label>Equipment</label>${EQUIP.map((q,i)=>`<label class="eq"><input type=checkbox class=bq value="${q.id}" onchange="upd()"> ${q.id} (${money(q.p)})</label>`).join('')}
+ <label for=bn>Notes for the planner</label><textarea id=bn rows=3></textarea>
+ <div class="total"><div><div class="mu">Estimated total incl. 18% GST</div><span class="price" id=bt2></span></div><button onclick="doBook()">Confirm booking</button></div></div>`},
+mine:()=>{const u=me(),l=load().bookings.filter(b=>b.email===u.email).reverse();return `<h2>My bookings</h2>`+(l.length?`<div class="grid">${l.map(b=>`<div class="card"><b>${esc(b.receipt)}</b><h3>${esc(b.event)}</h3><p class="mu">${esc(b.date)} at ${esc(b.time)}<br>${esc(b.venue)}</p><p><span class="tag ${st(b.status)}">${b.status}</span> <span class="tag ${b.paid?'ok':'wa'}">${b.paid?'Paid':'Unpaid'}</span></p><button class="sm" onclick="go('bill','${b.receipt}')">View bill</button></div>`).join('')}</div>`:'<p class="mu">No bookings yet. <a href="#" onclick="go(\'book\');return false">Book your first event</a>.</p>')},
+bill:()=>{const b=load().bookings.find(x=>x.receipt===arg),u=me();if(!b||!u||(!u.admin&&b.email!==u.email))return'<p>Bill not found.</p>';const c=calc(b);
+ return `<div class="bill card"><h2>Bill ${esc(b.receipt)}</h2><p class="mu">${esc(b.name)} · ${esc(b.email)} · ${esc(b.phone)}<br>${esc(b.event)} on ${esc(b.date)} at ${esc(b.time)}, ${esc(b.venue)}, ${b.guests} guests</p>
+ <table><tr><th>Item</th><th>Amount</th></tr>${c.items.map(i=>`<tr><td>${esc(i[0])}</td><td>${money(i[1])}</td></tr>`).join('')}<tr><td>Subtotal</td><td>${money(c.sub)}</td></tr><tr><td>GST 18%</td><td>${money(c.tax)}</td></tr><tr><th>Total</th><th>${money(c.total)}</th></tr></table>
+ <p><span class="tag ${b.paid?'ok':'wa'}">${b.paid?'Paid · ref '+esc(b.payRef):'Unpaid'}</span></p>
+ ${!b.paid&&b.status!=='Cancelled'?`<div class="noprint"><h3>Pay ${money(c.total)}</h3><label for=pm>Method</label><select id=pm><option>Card</option><option>UPI</option><option>Net banking</option></select><label for=pn>Name on card / UPI ID</label><input id=pn><p><button onclick="pay('${b.receipt}')">Pay now</button></p><p class="mu">Demo payment: no real money moves.</p></div>`:''}
+ <p class="noprint"><button class="alt" onclick="window.print()">Print bill</button> <button class="alt" onclick="go(me().admin?'admin':'mine')">Back</button></p></div>`},
+admin:()=>{const u=me();if(!u||!u.admin)return'<p>Admins only.</p>';const d=load(),l=[...d.bookings].reverse(),rev=d.bookings.filter(b=>b.paid).reduce((s,b)=>s+calc(b).total,0);
+ return `<h2>Admin dashboard</h2><div class="grid" style="margin-bottom:18px"><div class="card"><div class="mu">Bookings</div><div class="price">${d.bookings.length}</div></div><div class="card"><div class="mu">Customers</div><div class="price">${d.users.filter(x=>!x.admin).length}</div></div><div class="card"><div class="mu">Revenue received</div><div class="price">${money(rev)}</div></div></div>
+ <div class="tbl card"><table><tr><th>Receipt</th><th>Customer / contact</th><th>Event</th><th>When / where</th><th>Status</th><th>Payment</th><th></th></tr>
+ ${l.map(b=>`<tr><td>${esc(b.receipt)}</td><td>${esc(b.name)}<br><a href="mailto:${esc(b.email)}">${esc(b.email)}</a><br>${esc(b.phone)}</td><td>${esc(b.event)}<br><span class="mu">${esc(b.pack)}, ${b.guests} guests</span>${b.notes?`<br><span class="mu">“${esc(b.notes)}”</span>`:''}</td><td>${esc(b.date)} ${esc(b.time)}<br>${esc(b.venue)}</td>
+ <td><select aria-label="Status" onchange="setSt('${b.receipt}',this.value)">${['Pending','Confirmed','Completed','Cancelled'].map(s=>`<option ${s===b.status?'selected':''}>${s}</option>`).join('')}</select></td>
+ <td><span class="tag ${b.paid?'ok':'wa'}">${b.paid?'Paid':'Unpaid'}</span><br>${money(calc(b).total)}</td><td><button class="sm alt" onclick="go('bill','${b.receipt}')">Bill</button></td></tr>`).join('')||'<tr><td colspan=7 class="mu">No bookings yet.</td></tr>'}</table></div>
+ <p class="mu">Data is stored in this browser, so the admin and customers must use the same browser to see each other's bookings.</p>`}};
+const st=s=>s==='Confirmed'||s==='Completed'?'ok':s==='Cancelled'?'er':'wa';
+const $=id=>document.getElementById(id);
+function doLogin(){const d=load(),u=d.users.find(x=>x.email===$('le').value.trim().toLowerCase()&&x.pass===$('lp').value);
+ if(!u){flash='Email or password is incorrect.';return render()}d.session=u.email;save();flash='Welcome, '+u.name+'.';go(u.admin?'admin':'mine')}
+function doReg(){const d=load(),n=$('rn').value.trim(),e=$('re').value.trim().toLowerCase(),p=$('rp').value,ph=$('rph').value.trim();
+ if(!n||!/^\S+@\S+\.\S+$/.test(e)||p.length<6||!ph){flash='Enter your name, a valid email, a phone number and a password of 6+ characters.';return render()}
+ if(d.users.some(x=>x.email===e)){flash='That email is already registered. Log in instead.';return render()}
+ d.users.push({name:n,email:e,phone:ph,pass:p});d.session=e;save();flash='Account created. You are logged in.';go('book')}
+function form(){return{event:$('be').value,pack:$('bp').value,venue:$('bv').value,equip:[...document.querySelectorAll('.bq:checked')].map(x=>x.value)}}
+function upd(){if(!$('be'))return;$('bt2').textContent=money(calc(form()).total)}
+function doBook(){const u=me(),f=form(),date=$('bd').value,time=$('bt').value,g=parseInt($('bg').value);
+ if(!date||!time||!(g>0)){flash='Choose a date, a time and the number of guests.';const s=arg;render();return}
+ if(date<new Date().toISOString().slice(0,10)){flash='The event date must be today or later.';return render()}
+ const d=load();d.seq++;const b={receipt:'EP-'+new Date().getFullYear()+'-'+d.seq,...f,date,time,guests:g,notes:$('bn').value.trim(),name:u.name,email:u.email,phone:u.phone,status:'Pending',paid:false,created:new Date().toISOString()};
+ d.bookings.push(b);save();flash='Booked. Your receipt number is '+b.receipt+'. Pay below or later from My bookings.';go('bill',b.receipt)}
+function pay(r){if(!$('pn').value.trim()){flash='Enter the name on the card or your UPI ID.';return render()}
+ const b=load().bookings.find(x=>x.receipt===r);b.paid=true;b.payRef='PAY'+Date.now().toString().slice(-8);b.method=$('pm').value;if(b.status==='Pending')b.status='Confirmed';save();flash='Payment received. Thank you.';render()}
+function setSt(r,s){load().bookings.find(x=>x.receipt===r).status=s;save();flash='Status updated to '+s+'.';render()}
+render();
+</script></body></html>
